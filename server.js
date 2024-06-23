@@ -1,14 +1,13 @@
 const express = require("express");
 const app = express();
+const { MongoClient, ObjectId } = require("mongodb");
 
 // 폴더 등록
-app.use(express.static(__dirname + "/src"));
+app.use(express.static("src"));
 app.set("view engin", "ejs");
 // 요청.body에서 값 빼기 쉽게 해준다.
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const { MongoClient } = require("mongodb");
 
 let db;
 // db접속 url 넣기
@@ -71,4 +70,12 @@ app.post("/add", async (요청, 응답) => {
 		console.log(e);
 		응답.status(500).send("서버 에러남");
 	}
+});
+
+app.get("/detail/:id", async (요청, 응답) => {
+	let result = await db
+		.collection("post")
+		.findOne({ _id: new ObjectId(요청.params) });
+	console.log(result);
+	응답.render("detail.ejs", { title: result.title, content: result.content });
 });
