@@ -50,7 +50,7 @@ app.get("/write", (요청, 응답) => {
 });
 
 app.post("/add", async (요청, 응답) => {
-	console.log(요청.body);
+	// console.log(요청.body);
 
 	try {
 		if (요청.body.title == "") {
@@ -77,7 +77,7 @@ app.get("/detail/:id", async (요청, 응답) => {
 		let result = await db
 			.collection("post")
 			.findOne({ _id: new ObjectId(요청.params.id) });
-		console.log(result);
+		// console.log(result);
 		if (result) {
 			응답.render("detail.ejs", {
 				title: result.title,
@@ -90,4 +90,22 @@ app.get("/detail/:id", async (요청, 응답) => {
 		console.log(e);
 		응답.status(404).send("이상한 url을 입력하였습니다.");
 	}
+});
+
+app.get("/edit/:id", async (요청, 응답) => {
+	let result = await db
+		.collection("post")
+		.findOne({ _id: new ObjectId(요청.params.id) });
+	// console.log(result);
+	응답.render("edit.ejs", { result: result });
+});
+
+app.post("/edit", async (요청, 응답) => {
+	let result = await db
+		.collection("post")
+		.updateOne(
+			{ _id: new ObjectId(요청.body.id) },
+			{ $set: { title: 요청.body.title, content: 요청.body.content } },
+		);
+	응답.redirect("/list");
 });
