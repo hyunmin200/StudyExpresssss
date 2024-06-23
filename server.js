@@ -50,10 +50,25 @@ app.get("/write", (요청, 응답) => {
 	응답.render("write.ejs");
 });
 
-app.post("/add", (요청, 응답) => {
-	응답.send("전송 완료!");
+app.post("/add", async (요청, 응답) => {
 	console.log(요청.body);
-	db.collection("post").insertOne(요청.body, (에러, 결과) => {
-		console.log("삽입 완료");
-	});
+
+	try {
+		if (요청.body.title == "") {
+			응답.send("제목 입력안함");
+		} else {
+			await db
+				.collection("post")
+				.insertOne(
+					{ title: 요청.body.title, content: 요청.body.content },
+					(에러, 결과) => {
+						console.log("삽입 완료");
+					},
+				);
+			응답.redirect("/list");
+		}
+	} catch (e) {
+		console.log(e);
+		응답.status(500).send("서버 에러남");
+	}
 });
