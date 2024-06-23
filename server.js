@@ -4,6 +4,9 @@ const app = express();
 // 폴더 등록
 app.use(express.static(__dirname + "/src"));
 app.set("view engin", "ejs");
+// 요청.body에서 값 빼기 쉽게 해준다.
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const { MongoClient } = require("mongodb");
 
@@ -41,4 +44,16 @@ app.get("/list", async (요청, 응답) => {
 
 app.get("/time", (요청, 응답) => {
 	응답.render("time.ejs", { time: new Date() });
+});
+
+app.get("/write", (요청, 응답) => {
+	응답.render("write.ejs");
+});
+
+app.post("/add", (요청, 응답) => {
+	응답.send("전송 완료!");
+	console.log(요청.body);
+	db.collection("post").insertOne(요청.body, (에러, 결과) => {
+		console.log("삽입 완료");
+	});
 });
