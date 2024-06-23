@@ -38,3 +38,7 @@ app.get("/list", async (요청, 응답) => {
 
 	응답.render("list.ejs", { 글목록: result });
 });
+
+app.get("/time", (요청, 응답) => {
+	응답.render("time.ejs", { time: new Date() });
+});
