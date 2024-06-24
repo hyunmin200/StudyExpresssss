@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const MongoStore = require("connect-mongo");
 
 app.use(passport.initialize());
 app.use(
@@ -23,6 +24,11 @@ app.use(
 		resave: false,
 		saveUninitialized: false,
 		cookie: { maxAge: 60 * 60 * 1000 },
+		store: MongoStore.create({
+			mongoUrl:
+				"mongodb+srv://admin:admin1233@study.7jsoezt.mongodb.net/?retryWrites=true&w=majority&appName=Study",
+			dbName: "forum",
+		}),
 	}),
 );
 
@@ -217,10 +223,18 @@ app.get("/register", (요청, 응답) => {
 });
 
 app.post("/register", async (요청, 응답) => {
-	let hash = await bcrypt.hash(요청.body.password, 10);
-
-	await db
+	let checkUser = await db
 		.collection("user")
-		.insertOne({ username: 요청.body.username, password: hash });
-	응답.redirect("/");
+		.findOne({ username: 요청.body.username });
+
+	if (checkUser) {
+		응답.send("중복 아이디입니다.");
+	} else {
+		let hash = await bcrypt.hash(요청.body.password, 10);
+
+		await db
+			.collection("user")
+			.insertOne({ username: 요청.body.username, password: hash });
+		응답.redirect("/");
+	}
 });
