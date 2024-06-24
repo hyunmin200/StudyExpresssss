@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Document</title>
-		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="/style.css" />
 	</head>
 	<body class="grey-bg">
 		<%- include("nav.ejs") %>
@@ -22,14 +22,22 @@
 			<% } %>
 		</div>
 
+		<a href="/list/next/<%=글목록[글목록.length-1]._id%>">다음</a>
+
 		<script>
-			document.querySelectorAll(".delete").forEach((item) => {
-				item.addEventListener("click", (e) => {
-					fetch(`/delete?docid=${e.target.dataset.id}`, {
-						method: "DELETE",
+			for (let i = 0; i < "<%=글목록.length %>"; i++)
+				document
+					.querySelectorAll(".delete")
+					[i].addEventListener("click", (e) => {
+						fetch(`/delete?docid=${e.target.dataset.id}`, {
+							method: "DELETE",
+						})
+							.then((r) => r.text())
+							.then((r) => {
+								e.target.parentElement.parentElement.style.display = "none";
+								console.log(i);
+							});
 					});
-				});
-			});
 		</script>
 	</body>
 </html>

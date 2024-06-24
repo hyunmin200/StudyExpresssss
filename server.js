@@ -119,3 +119,22 @@ app.delete("/delete", async (요청, 응답) => {
 		.deleteOne({ _id: new ObjectId(요청.query.docid) });
 	응답.send("삭제 완료");
 });
+
+// app.get("/list/:id", async (요청, 응답) => {
+// 	let result = await db
+// 		.collection("post")
+// 		.find()
+// 		.skip(5 * (요청.params.id - 1))
+// 		.limit(5)
+// 		.toArray();
+// 	응답.render("list.ejs", { 글목록: result });
+// });
+
+app.get("/list/next/:id", async (요청, 응답) => {
+	let result = await db
+		.collection("post")
+		.find({ _id: { $gt: new ObjectId(요청.params.id) } })
+		.limit(5)
+		.toArray();
+	응답.render("list.ejs", { 글목록: result });
+});
