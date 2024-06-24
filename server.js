@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const { MongoClient, ObjectId } = require("mongodb");
 const methodOverride = require("method-override");
+const bcrypt = require("bcrypt");
 
 app.use(methodOverride("_method"));
 // 폴더 등록
@@ -163,7 +164,8 @@ passport.use(
 		if (!result) {
 			return cb(null, false, { message: "아이디 DB에 없음" });
 		}
-		if (result.password == 입력한비번) {
+
+		if (await bcrypt.compare(입력한비번, result.password)) {
 			return cb(null, result);
 		} else {
 			return cb(null, false, { message: "비번불일치" });
@@ -215,8 +217,10 @@ app.get("/register", (요청, 응답) => {
 });
 
 app.post("/register", async (요청, 응답) => {
+	let hash = await bcrypt.hash(요청.body.password, 10);
+
 	await db
 		.collection("user")
-		.insertOne({ username: 요청.body.username, password: 요청.body.password });
+		.insertOne({ username: 요청.body.username, password: hash });
 	응답.redirect("/");
 });
