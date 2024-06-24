@@ -209,3 +209,14 @@ app.get("/mypage", (요청, 응답) => {
 	}
 	응답.render("mypage.ejs", { user: 요청.user });
 });
+
+app.get("/register", (요청, 응답) => {
+	응답.render("register.ejs");
+});
+
+app.post("/register", async (요청, 응답) => {
+	await db
+		.collection("user")
+		.insertOne({ username: 요청.body.username, password: 요청.body.password });
+	응답.redirect("/");
+});
