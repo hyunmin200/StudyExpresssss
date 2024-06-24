@@ -71,6 +71,9 @@ app.get("/time", (요청, 응답) => {
 });
 
 app.get("/write", (요청, 응답) => {
+	if (!요청.user) {
+		응답.send("로그인하세요!");
+	}
 	응답.render("write.ejs");
 });
 
