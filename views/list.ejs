@@ -15,7 +15,7 @@
 				<h4>
 					<a href="/detail/<%=글목록[i]._id%>"><%= 글목록[i].title %></a>
 					<a href="/edit/<%=글목록[i]._id%>">🖋️</a>
-					<span class="delete">🗑️</span>
+					<span class="delete" data-id="<%=글목록[0]._id%>">🗑️</span>
 				</h4>
 				<p><%= 글목록[i].content %></p>
 			</div>
@@ -23,13 +23,11 @@
 		</div>
 
 		<script>
-			document.querySelectorAll(".delete")[0].addEventListener("click", () => {
-				fetch("/abc", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ a: 1 }),
+			document.querySelectorAll(".delete").forEach((item) => {
+				item.addEventListener("click", (e) => {
+					fetch(`/delete?docid=${e.target.dataset.id}`, {
+						method: "DELETE",
+					});
 				});
 			});
 		</script>
