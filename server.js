@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 const { MongoClient, ObjectId } = require("mongodb");
+const methodOverride = require("method-override");
 
+app.use(methodOverride("_method"));
 // 폴더 등록
 app.use(express.static("src"));
 app.set("view engin", "ejs");
@@ -100,7 +102,7 @@ app.get("/edit/:id", async (요청, 응답) => {
 	응답.render("edit.ejs", { result: result });
 });
 
-app.post("/edit", async (요청, 응답) => {
+app.put("/edit", async (요청, 응답) => {
 	let result = await db
 		.collection("post")
 		.updateOne(
@@ -108,4 +110,8 @@ app.post("/edit", async (요청, 응답) => {
 			{ $set: { title: 요청.body.title, content: 요청.body.content } },
 		);
 	응답.redirect("/list");
+});
+
+app.post("/abc", async (요청, 응답) => {
+	console.log("값: ", 요청.body);
 });
