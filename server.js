@@ -38,6 +38,7 @@ app.use(passport.session());
 const { S3Client } = require("@aws-sdk/client-s3");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
+
 const s3 = new S3Client({
 	region: "ap-northeast-2",
 	credentials: {
@@ -56,11 +57,11 @@ const upload = multer({
 	}),
 });
 
+const connectDB = require("./database.js");
+
 let db;
 // db접속 url 넣기
-const url = process.env.DB_URL;
-new MongoClient(url)
-	.connect()
+connectDB
 	.then((client) => {
 		console.log("DB연결성공");
 		db = client.db("forum");
@@ -268,3 +269,6 @@ app.post("/register", async (요청, 응답) => {
 		응답.redirect("/");
 	}
 });
+
+app.use("/shop", require("./routes/shop.js"));
+app.use("/", require("./routes/board.js"));
