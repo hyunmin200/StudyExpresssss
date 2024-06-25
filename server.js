@@ -3,6 +3,7 @@ const app = express();
 const { MongoClient, ObjectId } = require("mongodb");
 const methodOverride = require("method-override");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
 
 app.use(methodOverride("_method"));
 // 폴더 등록
@@ -34,22 +35,47 @@ app.use(
 
 app.use(passport.session());
 
+const { S3Client } = require("@aws-sdk/client-s3");
+const multer = require("multer");
+const multerS3 = require("multer-s3");
+const s3 = new S3Client({
+	region: "ap-northeast-2",
+	credentials: {
+		accessKeyId: process.env.S3_KEY,
+		secretAccessKey: process.env.S3_SECRET,
+	},
+});
+
+const upload = multer({
+	storage: multerS3({
+		s3: s3,
+		bucket: "adminforum1",
+		key: function (요청, file, cb) {
+			cb(null, Date.now().toString()); //업로드시 파일명 변경가능
+		},
+	}),
+});
+
 let db;
 // db접속 url 넣기
-const url =
-	"mongodb+srv://admin:admin1233@study.7jsoezt.mongodb.net/?retryWrites=true&w=majority&appName=Study";
+const url = process.env.DB_URL;
 new MongoClient(url)
 	.connect()
 	.then((client) => {
 		console.log("DB연결성공");
 		db = client.db("forum");
-		app.listen(8080, () => {
+		app.listen(process.env.PORT, () => {
 			console.log("http://localhost:8080 에서 서버 실행중");
 		});
 	})
 	.catch((err) => {
 		console.log(err);
 	});
+
+app.use("/list", (요청, 응답, next) => {
+	console.log(new Date());
+	next();
+});
 
 app.get("/", (요청, 응답) => {
 	응답.send("반갑다");
@@ -77,21 +103,21 @@ app.get("/write", (요청, 응답) => {
 	응답.render("write.ejs");
 });
 
-app.post("/add", async (요청, 응답) => {
-	// console.log(요청.body);
-
+app.post("/add", upload.single("img1"), async (요청, 응답) => {
 	try {
 		if (요청.body.title == "") {
 			응답.send("제목 입력안함");
 		} else {
-			await db
-				.collection("post")
-				.insertOne(
-					{ title: 요청.body.title, content: 요청.body.content },
-					(에러, 결과) => {
-						console.log("삽입 완료");
-					},
-				);
+			await db.collection("post").insertOne(
+				{
+					title: 요청.body.title,
+					content: 요청.body.content,
+					img: 요청.file.location,
+				},
+				(에러, 결과) => {
+					console.log("삽입 완료");
+				},
+			);
 			응답.redirect("/list");
 		}
 	} catch (e) {
@@ -110,6 +136,7 @@ app.get("/detail/:id", async (요청, 응답) => {
 			응답.render("detail.ejs", {
 				title: result.title,
 				content: result.content,
+				img: result.img,
 			});
 		} else {
 			응답.status(404).send("이상한 url을 입력하였습니다.");
